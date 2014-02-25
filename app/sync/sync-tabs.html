@@ -1,0 +1,191 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Firefox Accounts</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <link rel="stylesheet" href="/latin/firasans-regular,firasans-light,clearsans-regular/fonts.css">
+        <!-- build:css(.tmp) /styles/sync.css -->
+        <link rel="stylesheet" href="/bower_components/normalize-css/normalize.css">
+        <link rel="stylesheet" href="/styles/main.css">
+        <link rel="stylesheet" href="/styles/sync.css">
+        <style>
+            #stage {
+                padding:20px;
+                width:550px;
+            }
+
+            input {
+                float:right; 
+                border-radius: 5px;
+                padding:4px;
+                border:1px solid #ccc;
+                text-align: right;
+                color:#999;
+            }
+            .sync-tabs header h2 {
+                font-weight:200;
+                font-size:18px;
+                margin: 6px 0 20px 0;
+                text-align: left;
+                width:45%;
+                float:left;
+            }
+
+            #main-header {
+            }
+            #sync-logo {
+                background:url(../images/graphic_sync_spinner@2x.png) no-repeat;
+                background-size:40px auto;
+                background-position: left top;
+                display: block;
+                width:50px;
+                height:40px;
+                float:left;
+                position: relative;
+                top:-4px;
+                left:-4px;
+            }
+            
+
+             .device {
+                clear:both; !important;
+                padding: 30px 0 0 0;
+            }
+
+            .device header {
+                padding:0 0 5px 0;
+                border-bottom: 1px dashed #ccc;
+            }
+
+            .device-logo {
+                width:16px;
+                height:24px;
+                background: #999;
+                vertical-align: center;
+                margin:0 10px 0 0;
+                padding:0;
+                color: #999;
+                border-radius: 2px;
+                display: block;
+                float:left;
+            }
+
+
+            .sync-tabs .device h3 {
+                text-align: left;
+                padding: 6px 0 10px 0;
+                font-size: 14px;
+                font-weight: 200;
+            }
+
+            .device ul {
+                padding:0;
+                list-style: none;
+                text-align: left;
+            }
+
+            .device li {
+                padding:10px 20px;
+                background: #f2f2f2;
+                border-radius: 3px;
+                border-bottom:1px solid #ddd;
+                cursor:pointer;
+                margin: 0 0 4px 0;
+            }
+
+            .device li:hover {
+                background:#eee;
+            }
+
+            .fav {
+                width:18px;
+                height:18px;
+                vertical-align: center;
+                padding:0;
+                background: #999;
+                border-radius: 2px;
+                display: block;
+                float:left;
+                margin:0 20px 0 0;
+                color:#999;
+                position: relative;
+                top:12px;
+
+            }
+
+            h4 {
+                margin:0;
+                font-weight:200;
+                font-size: 16px
+            }
+
+            a {
+                text-decoration: none;
+                font-size: 12px;
+                margin-left:38px;
+            }
+
+
+        </style>
+        <!-- endbuild -->
+    </head>
+    <body>
+        <div id="stage" class="sync-tabs">
+            <header id="main-header">
+              <span id="sync-logo"></span>
+              <h2>Tabs from Other Devices</h2>
+              <input type="text" placeholder="search tabs" name="" value="">
+            </header>
+
+            <section class='device'>
+                <header><span class="device-logo">P</span>
+                <h3>John's Phone</h3>
+                </header>
+                <ul>
+                    <li>
+                        <h4><span class="fav">#</span>The New York Times</h4>
+                        <a href="#">nytimes.com</a>
+
+                    </li>
+                    <li>
+                        <h4><span class="fav">#</span>The New York Times</h4>
+                        <a href="#">nytimes.com</a>
+
+                    </li>
+                    <li>
+                        <h4><span class="fav">#</span>The New York Times</h4>
+                        <a href="#">nytimes.com</a>
+
+                    </li>
+                    <li>
+                        <h4><span class="fav">#</span>The New York Times</h4>
+                        <a href="#">nytimes.com</a>
+
+                    </li>
+                </ul>
+            </section>
+             <section class='device'>
+                <header><span class="device-logo">P</span>
+                <h3>John's Phone</h3>
+                </header>
+                <ul>
+                    <li>
+                        <h4><span class="fav">#</span>The New York Times</h4>
+                        <a href="#">nytimes.com</a>
+                    </li>
+                    <li>
+                        <h4><span class="fav">#</span>The New York Times</h4>
+                        <a href="#">nytimes.com</a>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </body>
+</html>
