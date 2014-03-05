@@ -18,7 +18,7 @@ install:
   - cd node_modules/fxa-auth-server
   - npm install --silent
   - node ./scripts/gen_keys.js
-  - npm start &
+  - CONTENT_SERVER_URL=http://127.0.0.1:3030 TEMPLATE_SERVER_URL=http://127.0.0.1:3030 npm start &
   - cd ../..
 # copy over the configuration that can be used to start the server.
   - cp server/config/local.json-dist server/config/local.json
