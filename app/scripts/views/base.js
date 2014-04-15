@@ -13,11 +13,43 @@ define([
   'lib/auth-errors',
   'lib/fxa-client',
   'lib/url',
-  'lib/strings'
+  'lib/strings',
+  'views/progress-indicator'
 ],
-function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) {
+function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings, ProgressIndicator) {
   var ENTER_BUTTON_CODE = 13;
   var DEFAULT_TITLE = window.document.title;
+  var EPHEMERAL_MESSAGE_ANIMATION_MS = 150;
+
+  /**
+   * An asynchronous action that may need a progress indicator.
+   *
+   * @method withProgress
+   * @return {promise} resolves with the return value of the handler, or
+   * rejects with any errors.
+   */
+  var progressIndicator = new ProgressIndicator();
+  function withProgress(handler) {
+    return function () {
+      var self = this;
+
+      var args = [].slice.call(arguments, 0);
+      args.unshift(handler);
+
+      progressIndicator.start();
+      return p()
+          .then(function () {
+            return self.invokeHandler.apply(self, args);
+          })
+          .then(function (value) {
+            progressIndicator.done(self.className);
+            return value;
+          }, function(err) {
+            progressIndicator.done(self.className);
+            throw err;
+          });
+    };
+  }
 
   var BaseView = Backbone.View.extend({
     constructor: function (options) {
@@ -44,7 +76,7 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
      * * afterRender - called after the rendering occurs. Can be used
      *   to print an error message after the view is already rendered.
      */
-    render: function () {
+    render: withProgress(function () {
       var self = this;
       return p()
         .then(function () {
@@ -77,7 +109,7 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
             return true;
           });
         });
-    },
+    }),
 
     /**
      * Checks if the user is authorized to view the page. Currently
@@ -219,12 +251,21 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
         this.$('.success').text(this.translator.get(msg));
       }
 
-      this.$('.success').show();
+      this.$('.success').slideDown(EPHEMERAL_MESSAGE_ANIMATION_MS);
       this.trigger('success', msg);
+      this._isSuccessVisible = true;
     },
 
     hideSuccess: function () {
-      this.$('.success').hide();
+      this.$('.success').slideUp(EPHEMERAL_MESSAGE_ANIMATION_MS);
+      this._isSuccessVisible = false;
+    },
+
+    /**
+     * Return true if the success message is visible
+     */
+    isSuccessVisible: function () {
+      return !!this._isSuccessVisible;
     },
 
     /**
@@ -262,7 +303,7 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
         this.$('.error').text(translated);
       }
 
-      this.$('.error').show();
+      this.$('.error').slideDown(EPHEMERAL_MESSAGE_ANIMATION_MS);
       this.trigger('error', translated);
 
       this._isErrorVisible = true;
@@ -292,7 +333,7 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
         this.$('.error').html(translated);
       }
 
-      this.$('.error').show();
+      this.$('.error').slideDown(EPHEMERAL_MESSAGE_ANIMATION_MS);
       this.trigger('error', translated);
 
       this._isErrorVisible = true;
@@ -301,7 +342,7 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
     },
 
     hideError: function () {
-      this.$('.error').hide();
+      this.$('.error').slideUp(EPHEMERAL_MESSAGE_ANIMATION_MS);
       this._isErrorVisible = false;
     },
 
@@ -347,8 +388,9 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
      * the handler on `this`.
      *
      * @method invokeHandler
+     * @param {string || function} handler.
      */
-    invokeHandler: function (handler, event) {
+    invokeHandler: function (handler/*, args...*/) {
       // convert a name to a function.
       if (typeof handler === 'string') {
         handler = this[handler];
@@ -359,7 +401,8 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
       }
 
       if (typeof handler === 'function') {
-        return handler.call(this, event);
+        var args = [].slice.call(arguments, 1);
+        return handler.apply(this, args);
       }
     },
 
@@ -414,6 +457,11 @@ function (_, Backbone, jQuery, p, Session, authErrors, FxaClient, Url, Strings) 
       return this.invokeHandler.apply(this, args);
     };
   };
+
+  /**
+   * Expose withProgress to other classes
+   */
+  BaseView.withProgress = withProgress;
 
   /**
    * t is a wrapper that is used for string extraction. The extraction
