@@ -73,7 +73,12 @@ function (p, _, FormView, Template, Session, Cropper, AuthErrors) {
     submit: function () {
       var self = this;
       return p().then(function () {
-        var data = self.cropper.toDataURL();
+        var data;
+        if (self.automatedBrowser) {
+          data = 'test';
+        } else {
+          data = self.cropper.toDataURL();
+        }
         // TODO upload to the server
         Session.set('avatar', data);
         self.navigate('settings/avatar');

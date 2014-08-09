@@ -51,6 +51,18 @@ function ($, _, FormView, Template, Session, AuthErrors) {
     },
 
     filePicker: function () {
+      // skip the file picker if this is an automater browser
+      if (this.automatedBrowser) {
+        var self = this;
+        require(['../bower_components/jquery-ui/ui/draggable'], function (ui) {
+          Session.set('cropImgSrc', 'stuff');
+          Session.set('cropImgWidth', 1);
+          Session.set('cropImgHeight', 1);
+
+          self.navigate('settings/avatar/crop');
+        });
+        return;
+      }
       this.$('#imageLoader').click();
     },
 
