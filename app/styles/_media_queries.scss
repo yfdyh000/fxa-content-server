@@ -117,6 +117,33 @@ only screen and (orientation:landscape) and (min-width:481px) and (max-height:48
     }
   }
 
+  .avatar_change {
+    .gravatar-logo {
+      height: 29px;
+      width: 29px;
+      padding-top:-1px;
+    }
+
+    nav {
+      margin: 60px -20px -10px -20px;
+      padding: 10px;
+
+      a {
+        font-size: 12px;
+        height: 64.5px;
+        line-height: 1.1;
+        margin: 5px;
+        padding: 8px 9px 11px 9px;
+        width: 64.5px;
+      }
+
+      span {
+        font-size: 25px;
+      }
+  }
+
+}
+
   @keyframes movein {
     0% {
       left: 0;
