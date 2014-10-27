@@ -46,6 +46,11 @@ module.exports = function (config, i18n) {
       res.redirect(req.originalUrl.slice(3));
     });
 
+    // handle account unlock links
+    app.get('/v1/complete_unlock_account', function (req, res) {
+      res.redirect(req.originalUrl.slice(3));
+    });
+
     // handle email verification links
     app.get('/v1/verify_email', function (req, res) {
       res.redirect(req.originalUrl.slice(3));
@@ -92,7 +97,10 @@ module.exports = function (config, i18n) {
       '/oauth/signup',
       '/oauth/force_auth',
       '/cookies_disabled',
-      '/clear'
+      '/clear',
+      '/confirm_account_unlock',
+      '/complete_unlock_account',
+      '/account_unlock_complete'
     ];
 
     var ALLOWED_TO_FRAME = {

@@ -274,6 +274,18 @@ define([
       });
   }
 
+  function openUnlockLinkDifferentBrowser(client, email) {
+    var user = TestHelpers.emailToUser(email);
+
+    return getVerificationHeaders(user, 0)
+      .then(function (headers) {
+        var uid = headers['x-uid'];
+        var code = headers['x-unlock-code'];
+
+        return client.accountUnlockVerifyCode(uid, code);
+      });
+  }
+
   function openFxaFromRp(context, page, urlSuffix) {
 
     // force_auth does not have a button on 123done, instead this is
@@ -455,6 +467,7 @@ define([
     openVerificationLinkSameBrowser: openVerificationLinkSameBrowser,
     openVerificationLinkDifferentBrowser: openVerificationLinkDifferentBrowser,
     openPasswordResetLinkDifferentBrowser: openPasswordResetLinkDifferentBrowser,
+    openUnlockLinkDifferentBrowser: openUnlockLinkDifferentBrowser,
     openFxaFromRp: openFxaFromRp,
 
     fillOutSignIn: fillOutSignIn,

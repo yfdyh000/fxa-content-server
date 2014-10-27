@@ -75,6 +75,14 @@ function (chai, sinon, View, Session, FxaClient, p, FxDesktopRelier,
             });
       });
 
+      it('renders with correct header for account_unlock type', function () {
+        view.type = 'account_unlock';
+        return view.render()
+            .then(function () {
+              assert.ok(view.$('#fxa-account-unlock-complete-header').length);
+            });
+      });
+
       it('shows service name if available', function () {
         relier.set('serviceName', 'Firefox Sync');
 
