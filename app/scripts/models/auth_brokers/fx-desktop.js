@@ -97,7 +97,7 @@ define([
     },
 
     afterSignUpConfirmationPoll: function () {
-      return this._notifyRelierOfLogin();
+      return p({ halt: true });
     },
 
     afterResetPasswordConfirmationPoll: function () {
