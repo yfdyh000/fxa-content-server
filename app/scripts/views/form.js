@@ -97,7 +97,7 @@ function (_, $, p, Validate, AuthErrors, BaseView, Tooltip,
       // the change event can be called after the form is already
       // submitted if the user presses "enter" in the form. If the
       // form is in the midst of being submitted, bail out now.
-      if (this.isSubmitting()) {
+      if (this.isSubmitting() || this.isHalted()) {
         return;
       }
 
@@ -151,6 +151,10 @@ function (_, $, p, Validate, AuthErrors, BaseView, Tooltip,
 
       return p()
         .then(function () {
+          if (self.isHalted()) {
+            return;
+          }
+
           if (! self.isValid()) {
             // Validation error is surfaced for testing.
             throw self.showValidationErrors();
@@ -467,14 +471,22 @@ function (_, $, p, Validate, AuthErrors, BaseView, Tooltip,
      * @return {promise || none} Return a promise if afterSubmit is
      *   an asynchronous operation.
      */
-    afterSubmit: function () {
-      // some views may display an error without throwing an exception.
-      // Check if the form is valid and no errors are visible before
+    afterSubmit: function (result) {
+      // the flow may be halted by an authentication broker after form
+      // submission. Views may display an error without throwing an exception.
+      // Ensure the flow is not halted and and no errors are visible before
       // re-enabling the form. The user must modify the form for it to
       // be re-enabled.
-      if (! this.isErrorVisible()) {
+
+      if (result && result.halt) {
+        this._isHalted = true;
+      }
+
+      if (! (this.isHalted() || this.isErrorVisible())) {
         this.enableForm();
       }
+
+      return result;
     },
 
     /**
@@ -484,6 +496,15 @@ function (_, $, p, Validate, AuthErrors, BaseView, Tooltip,
      */
     isSubmitting: function () {
       return this._isSubmitting;
+    },
+
+    /**
+     * Check if the view is halted
+     *
+     * @return {boolean} true if the view is halted, false otw.
+     */
+    isHalted: function () {
+      return this._isHalted;
     },
 
     /**
