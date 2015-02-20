@@ -641,18 +641,6 @@ function (Cocktail, _, Backbone, $, p, AuthErrors,
     },
 
     /**
-     * Import an item from the URL search parameters into the current context
-     */
-    importSearchParam: function (itemName) {
-      this[itemName] = this.searchParam(itemName);
-
-      if (! this[itemName]) {
-        var err = Strings.interpolate(t('missing search parameter: %(itemName)s'), { itemName: itemName });
-        throw new Error(err);
-      }
-    },
-
-    /**
      * Returns the currently logged in account
      */
     getSignedInAccount: function () {

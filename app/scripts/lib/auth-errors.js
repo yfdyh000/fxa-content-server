@@ -191,6 +191,10 @@ function (_, Errors) {
     FORCE_AUTH_EMAIL_REQUIRED: {
       errno: 1024,
       message: t('/force_auth requires an email')
+    },
+    EXPIRED_VERIFICATION_LINK: {
+      errno: 1025,
+      message: t('The link you clicked to verify your email is expired.')
     }
   };
 

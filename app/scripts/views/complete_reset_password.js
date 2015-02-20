@@ -13,10 +13,13 @@ define([
   'views/mixins/floating-placeholder-mixin',
   'lib/validate',
   'lib/auth-errors',
-  'views/mixins/service-mixin'
+  'views/mixins/service-mixin',
+  'models/verification/reset-password',
+  'lib/url'
 ],
 function (Cocktail, BaseView, FormView, Template, PasswordMixin,
-      FloatingPlaceholderMixin, Validate, AuthErrors, ServiceMixin) {
+      FloatingPlaceholderMixin, Validate, AuthErrors, ServiceMixin,
+      VerificationInfo, Url) {
   var t = BaseView.t;
   var View = FormView.extend({
     template: Template,
@@ -25,6 +28,9 @@ function (Cocktail, BaseView, FormView, Template, PasswordMixin,
     initialize: function (options) {
       options = options || {};
 
+      // TODO - pass this in!
+      var searchParams = Url.searchParams(this.window.location.search);
+      this._verificationInfo = new VerificationInfo(searchParams);
       this._interTabChannel = options.interTabChannel;
     },
 
@@ -36,22 +42,6 @@ function (Cocktail, BaseView, FormView, Template, PasswordMixin,
     // beforeRender is asynchronous and returns a promise. Only render
     // after beforeRender has finished its business.
     beforeRender: function () {
-      try {
-        this.importSearchParam('token');
-        this.importSearchParam('code');
-        this.importSearchParam('email');
-      } catch(e) {
-        // This is an invalid link. Abort and show an error message
-        // before doing any more checks.
-        this.logEvent('complete_reset_password.link_damaged');
-        return true;
-      }
-
-      // Remove any spaces that are probably due to a MUA adding
-      // line breaks in the middle of the link.
-      this.token = this.token.replace(/ /g, '');
-      this.code = this.code.replace(/ /g, '');
-
       if (! this._doesLinkValidate()) {
         // One or more parameters fails validation. Abort and show an
         // error message before doing any more checks.
@@ -60,10 +50,13 @@ function (Cocktail, BaseView, FormView, Template, PasswordMixin,
       }
 
       var self = this;
-      return this.fxaClient.isPasswordResetComplete(this.token)
+      var verificationInfo = this._verificationInfo;
+      var token = verificationInfo.get('token');
+      return this.fxaClient.isPasswordResetComplete(token)
         .then(function (isComplete) {
-          self._isLinkExpired = isComplete;
           if (isComplete) {
+            verificationInfo.setValidationError(
+                AuthErrors.toError('EXPIRED_VERIFICATION_LINK'));
             self.logEvent('complete_reset_password.link_expired');
           }
           return true;
@@ -75,14 +68,17 @@ function (Cocktail, BaseView, FormView, Template, PasswordMixin,
     },
 
     _doesLinkValidate: function () {
-      return Validate.isTokenValid(this.token) &&
-             Validate.isCodeValid(this.code) &&
-             Validate.isEmailValid(this.email);
+      return this._verificationInfo.isValid();
+    },
+
+    _isLinkExpired: function () {
+      var reason = this._verificationInfo.getValidationError();
+      return !! reason && AuthErrors.is(reason, 'EXPIRED_VERIFICATION_LINK');
     },
 
     context: function () {
       var doesLinkValidate = this._doesLinkValidate();
-      var isLinkExpired = this._isLinkExpired;
+      var isLinkExpired = this._isLinkExpired();
 
       // damaged and expired links have special messages.
       return {
@@ -106,10 +102,11 @@ function (Cocktail, BaseView, FormView, Template, PasswordMixin,
 
     submit: function () {
       var self = this;
-      var email = self.email;
+      var verificationInfo = this._verificationInfo;
+      var email = verificationInfo.get('email');
       var password = self._getPassword();
-      var token = self.token;
-      var code = self.code;
+      var token = verificationInfo.get('token');
+      var code = verificationInfo.get('code');
 
       // If the user verifies in the same browser and the original tab
       // is still open, we want the original tab to redirect back to
@@ -170,17 +167,18 @@ function (Cocktail, BaseView, FormView, Template, PasswordMixin,
 
     resendResetEmail: function () {
       var self = this;
-      return self.fxaClient.passwordReset(self.email, self.relier)
-              .then(function (result) {
-                self.navigate('confirm_reset_password', {
-                  data: {
-                    email: self.email,
-                    passwordForgotToken: result.passwordForgotToken
-                  }
-                });
-              }, function (err) {
-                self.displayError(err);
-              });
+      var email = self._verificationInfo.get('email');
+      return self.fxaClient.passwordReset(email, self.relier)
+        .then(function (result) {
+          self.navigate('confirm_reset_password', {
+            data: {
+              email: email,
+              passwordForgotToken: result.passwordForgotToken
+            }
+          });
+        }, function (err) {
+          self.displayError(err);
+        });
     }
   });
 

@@ -43,18 +43,18 @@ function (chai, sinon, p, View, AuthErrors, Metrics, Constants,
       windowMock.location.search = search || '?code=' + validCode + '&uid=' + validUid;
       initView();
       return view.render()
-          .then(function () {
-            assert.ok(view.$('#fxa-verification-link-expired-header').length);
-          });
+        .then(function () {
+          assert.ok(view.$('#fxa-verification-link-expired-header').length);
+        });
     }
 
     function testShowsDamagedScreen(search) {
       windowMock.location.search = search || '?code=' + validCode + '&uid=' + validUid;
       initView();
       return view.render()
-          .then(function () {
-            assert.ok(view.$('#fxa-verification-link-damaged-header').length);
-          });
+        .then(function () {
+          assert.ok(view.$('#fxa-verification-link-damaged-header').length);
+        });
     }
 
     function testEventLogged(eventName) {
@@ -117,8 +117,6 @@ function (chai, sinon, p, View, AuthErrors, Metrics, Constants,
         return testShowsDamagedScreen('?code=' + validCode)
             .then(function () {
               testEventLogged('complete_sign_up.link_damaged');
-            })
-            .then(function () {
               assert.isFalse(view.fxaClient.verifyCode.called);
             });
       });
@@ -127,8 +125,6 @@ function (chai, sinon, p, View, AuthErrors, Metrics, Constants,
         return testShowsDamagedScreen('?uid=' + validUid)
             .then(function () {
               testEventLogged('complete_sign_up.link_damaged');
-            })
-            .then(function () {
               assert.isFalse(view.fxaClient.verifyCode.called);
             });
       });
@@ -138,8 +134,6 @@ function (chai, sinon, p, View, AuthErrors, Metrics, Constants,
         return testShowsDamagedScreen()
             .then(function () {
               testEventLogged('complete_sign_up.link_damaged');
-            })
-            .then(function () {
               assert.isTrue(view.fxaClient.verifyCode.called);
             });
       });
@@ -154,8 +148,6 @@ function (chai, sinon, p, View, AuthErrors, Metrics, Constants,
         return testShowsExpiredScreen()
             .then(function () {
               testEventLogged('complete_sign_up.link_expired');
-            })
-            .then(function () {
               assert.equal(view.$('#resend').length, 1);
               assert.isTrue(view.fxaClient.verifyCode.called);
             });
@@ -169,8 +161,6 @@ function (chai, sinon, p, View, AuthErrors, Metrics, Constants,
         return testShowsExpiredScreen()
             .then(function () {
               testEventLogged('complete_sign_up.link_expired');
-            })
-            .then(function () {
               assert.equal(view.$('#resend').length, 0);
               assert.isTrue(view.fxaClient.verifyCode.called);
             });

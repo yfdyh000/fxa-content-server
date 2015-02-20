@@ -510,25 +510,6 @@ function (chai, $, sinon, BaseView, p, Translator, EphemeralMessages, Metrics,
       });
     });
 
-    describe('importSearchParam', function () {
-      it('imports an item from the url\'s search parameters, if available', function () {
-        windowMock.location.search = '?item=value';
-
-        view.importSearchParam('item');
-        assert.equal(view.item, 'value');
-      });
-
-      it('throws an error if search parameter is not available', function () {
-        var err;
-        try {
-          view.importSearchParam('non-existent');
-        } catch(e) {
-          err = e;
-        }
-        assert.ok(err);
-      });
-    });
-
     describe('logEvent', function () {
       it('logs an event to the event stream', function () {
         view.logEvent('event1');
