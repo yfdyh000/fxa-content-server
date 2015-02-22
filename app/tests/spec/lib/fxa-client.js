@@ -284,7 +284,8 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
         return client.signIn(email, password, relier, { customizeSync: true })
           .then(function (sessionData) {
             assert.isTrue(realClient.signIn.calledWith(trim(email), password, {
-              keys: true
+              keys: true,
+              service: 'sync'
             }));
 
             // The following should only be set for Sync
@@ -304,7 +305,8 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
         return client.signIn(email, password, relier, { customizeSync: true })
           .then(function (sessionData) {
             assert.isTrue(realClient.signIn.calledWith(trim(email), password, {
-              keys: false
+              keys: false,
+              service: 'chronical'
             }));
 
             // The following should only be set for Sync

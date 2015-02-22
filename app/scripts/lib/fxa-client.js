@@ -110,7 +110,15 @@ function (_, FxaClient, $, xhr, p, Session, AuthErrors, Constants) {
 
       return self._getClient()
         .then(function (client) {
-          return client.signIn(email, password, { keys: shouldFetchKeys(relier) });
+          var signInOptions = {
+            keys: shouldFetchKeys(relier)
+          };
+
+          if (relier.has('service')) {
+            signInOptions.service = relier.get('service');
+          }
+
+          return client.signIn(email, password, signInOptions);
         })
         .then(function (accountData) {
           return self._getUpdatedSessionData(email, relier, accountData, options);
