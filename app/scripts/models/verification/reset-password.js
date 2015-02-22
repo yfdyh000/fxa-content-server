@@ -11,9 +11,9 @@
 define([
   './base',
   'lib/validate'
-], function (Base, Validate) {
+], function (VerificationInfo, Validate) {
 
-  var ResetPasswordVerificationInfo = Base.extend({
+  var ResetPasswordVerificationInfo = VerificationInfo.extend({
     defaults: {
       token: null,
       code: null,

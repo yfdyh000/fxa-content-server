@@ -15,11 +15,12 @@ define([
   '../../../mocks/profile',
   'models/user',
   'models/reliers/relier',
+  'models/auth_brokers/base',
   'lib/promise',
   'lib/profile-client'
 ],
 function (chai, _, $, sinon, View, RouterMock, ProfileMock, User,
-    Relier, p, ProfileClient) {
+    Relier, AuthBroker, p, ProfileClient) {
   var assert = chai.assert;
   var GRAVATAR_URL = 'https://secure.gravatar.com/avatar/';
   var EMAIL_HASH = '0bc83cb571cd1c50ba6f3e8a78ef1346';
@@ -32,16 +33,21 @@ function (chai, _, $, sinon, View, RouterMock, ProfileMock, User,
     var user;
     var account;
     var relier;
+    var broker;
 
     beforeEach(function () {
       routerMock = new RouterMock();
       user = new User();
       relier = new Relier();
+      broker = new AuthBroker({
+        relier: relier
+      });
 
       view = new View({
         user: user,
         router: routerMock,
-        relier: relier
+        relier: relier,
+        broker: broker
       });
 
       account = user.initAccount({

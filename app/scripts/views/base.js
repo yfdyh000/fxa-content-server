@@ -11,14 +11,13 @@ define([
   'jquery',
   'lib/promise',
   'lib/auth-errors',
-  'lib/url',
   'lib/strings',
   'lib/ephemeral-messages',
   'lib/null-metrics',
   'views/mixins/timer-mixin'
 ],
 function (Cocktail, _, Backbone, $, p, AuthErrors,
-      Url, Strings, EphemeralMessages, NullMetrics, TimerMixin) {
+      Strings, EphemeralMessages, NullMetrics, TimerMixin) {
   var DEFAULT_TITLE = window.document.title;
   var EPHEMERAL_MESSAGE_ANIMATION_MS = 150;
 
@@ -104,8 +103,6 @@ function (Cocktail, _, Backbone, $, p, AuthErrors,
 
       this.fxaClient = options.fxaClient;
       this._canGoBack = options.canGoBack;
-
-      this.automatedBrowser = !!this.searchParam('automatedBrowser');
 
       Backbone.View.call(this, options);
 
@@ -631,13 +628,6 @@ function (Cocktail, _, Backbone, $, p, AuthErrors,
 
         return handler.apply(this, args);
       }
-    },
-
-    /**
-     * Fetch a search parameter from this.window.location.search
-     */
-    searchParam: function (itemName) {
-      return Url.searchParam(itemName, this.window.location.search);
     },
 
     /**

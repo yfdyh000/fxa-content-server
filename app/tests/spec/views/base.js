@@ -496,20 +496,6 @@ function (chai, $, sinon, BaseView, p, Translator, EphemeralMessages, Metrics,
       });
     });
 
-    describe('searchParam', function () {
-      it('gets an item from the url\'s search parameters, if available', function () {
-        windowMock.location.search = '?item=value';
-
-        var value = view.searchParam('item');
-        assert.equal(value, 'value');
-      });
-
-      it('returns `undefined` if search parameter is not available', function () {
-        var value = view.searchParam('non-existent');
-        assert.isUndefined(value);
-      });
-    });
-
     describe('logEvent', function () {
       it('logs an event to the event stream', function () {
         view.logEvent('event1');
