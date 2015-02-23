@@ -40,16 +40,9 @@ function ($, _, Cocktail, FormView, AvatarMixin, SettingsMixin, Template, AuthEr
       };
     },
 
-    beforeRender: function () {
-      var self = this;
-
-      return self._fetchProfileImage(self.getSignedInAccount())
-        .then(function (result) {
-          self.avatarId = result.id;
-          self.avatar = result.avatar;
-        }, function () {
-          // ignore errors
-        });
+    afterVisible: function () {
+      FormView.prototype.afterVisible.call(this);
+      return this._displayProfileImage(this.getSignedInAccount());
     },
 
     afterRender: function () {
@@ -61,7 +54,11 @@ function ($, _, Cocktail, FormView, AvatarMixin, SettingsMixin, Template, AuthEr
 
     remove: function () {
       var self = this;
-      return self.getSignedInAccount().deleteAvatar(self.avatarId)
+      var account = self.getSignedInAccount();
+      return account.getAvatar()
+        .then(function (avatar) {
+          return account.deleteAvatar(avatar.id);
+        })
         .then(function () {
           self.updateAvatarUrl(null);
           self.navigate('settings');

@@ -94,6 +94,10 @@ a.avatar-wrapper {
     height: 50px;
     width: 50px;
   }
+
+  .with-default + .remove {
+    display: none;
+  }
 }
 
 

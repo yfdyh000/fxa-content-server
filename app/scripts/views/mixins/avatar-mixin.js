@@ -7,7 +7,9 @@
 'use strict';
 
 define([
-], function () {
+  'lib/image-loader',
+  'lib/profile-errors'
+], function (ImageLoader, ProfileErrors) {
 
   return {
     // Attempt to load a profile image from the profile server
@@ -17,14 +19,13 @@ define([
       return account.getAvatar()
         .then(function (result) {
           if (result && result.avatar && result.id) {
-            self.logEvent(self.className + '.profile_image_shown');
-          } else {
-            self.logEvent(self.className + '.profile_image_not_shown');
+            return ImageLoader.load(result.avatar);
           }
-
-          return result;
-        }, function (err) {
-          self.logEvent(self.className + '.profile_image_not_shown');
+        })
+        .then(null, function (err) {
+          if (! err.errno) {
+            err = ProfileErrors.toError('IMAGE_LOAD_ERROR');
+          }
           // Failures to load a profile image are not displayed in the ui
           // so log the error here to make sure it's in metrics.
           self.logError(err);
@@ -50,18 +51,19 @@ define([
       }
 
       return this._fetchProfileImage(account)
-        .then(function (result) {
-          if (result && result.avatar) {
-            self.$(wrapperClass).append(new Image());
-            self.$(wrapperClass + ' img').attr('src', result.avatar);
+        .then(function (img) {
+          if (img) {
+            self.$(wrapperClass).append(img);
             self.$(wrapperClass).removeClass('with-default');
+            self.logEvent(self.className + '.profile_image_shown');
           } else {
-            self.$(wrapperClass).addClass('with-default');
+            self.logEvent(self.className + '.profile_image_not_shown');
           }
-          return result;
-        }, function () {
+        })
+        .then(null, function () {
           // Ignore errors; the default image will be shown.
           self.$(wrapperClass).addClass('with-default');
+          self.logEvent(self.className + '.profile_image_not_shown');
         });
     },
 
