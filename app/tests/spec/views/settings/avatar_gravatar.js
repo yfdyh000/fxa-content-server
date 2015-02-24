@@ -100,11 +100,17 @@ function (chai, _, $, sinon, View, RouterMock, ProfileMock, User,
       });
 
       it('found', function () {
-        view.automatedBrowser = true;
+        sinon.stub(broker, 'isAutomatedBrowser', function () {
+          return true;
+        });
 
         return view.render()
           .then(function () {
+            sinon.spy(view, 'render');
             return view._showGravatar();
+          })
+          .then(function () {
+            assert.isTrue(view.render.called);
           });
       });
 
@@ -118,15 +124,15 @@ function (chai, _, $, sinon, View, RouterMock, ProfileMock, User,
 
         it('submits', function () {
           sinon.stub(profileClientMock, 'postAvatar', function (token, url, selected) {
+            assert.include(url, GRAVATAR_URL + EMAIL_HASH);
             assert.isTrue(selected);
             return p({
               id: 'foo'
             });
           });
-          view.automatedBrowser = true;
 
           sinon.stub(view, 'updateAvatarUrl', function (result) {
-            assert.ok(result);
+            assert.include(result, GRAVATAR_URL + EMAIL_HASH);
             return p();
           });
 
@@ -135,6 +141,8 @@ function (chai, _, $, sinon, View, RouterMock, ProfileMock, User,
               return view.submit();
             })
             .then(function (result) {
+              assert.isTrue(view.updateAvatarUrl.called);
+              assert.isTrue(profileClientMock.postAvatar.called);
               assert.equal(result.id, 'foo');
               assert.equal(routerMock.page, 'settings');
               assert.equal(view.ephemeralMessages.get('successUnsafe'), 'Courtesy of <a href="https://www.gravatar.com">Gravatar</a>');
