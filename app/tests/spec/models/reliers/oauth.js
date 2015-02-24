@@ -85,6 +85,9 @@ define([
             // The redirect_uri passed in is ignored, we only care about
             // the redirect_uri returned by the oauth server
             assert.notEqual(relier.get('redirectUri'), REDIRECT_URI);
+
+            // Encryption keys are not fetched by default.
+            assert.equal(relier.get('keys'), false);
           });
       });
 
@@ -149,6 +152,19 @@ define([
           .then(function () {
             assert.equal(relier.get('clientId'), CLIENT_ID);
             assert.equal(relier.get('service'), CLIENT_ID);
+          });
+      });
+
+      it('populates `keys` from the URL search parameter if given', function () {
+        windowMock.location.search = TestHelpers.toSearchString({
+          keys: 'true',
+          client_id: CLIENT_ID,
+          scope: SCOPE
+        });
+
+        return relier.fetch()
+          .then(function () {
+            assert.equal(relier.get('keys'), true);
           });
       });
 
@@ -219,6 +235,14 @@ define([
       it('returns an opaque token to be passed along with email verification links', function () {
         relier.set('state', 'STATE');
         assert.equal(typeof relier.getResumeToken(), 'string');
+      });
+    });
+
+    describe('isKeyFetchEnabled', function () {
+      it('returns `true` only when keys are explicitly asked for', function () {
+        assert.isFalse(relier.isKeyFetchEnabled());
+        relier.set('keys', true);
+        assert.isTrue(relier.isKeyFetchEnabled());
       });
     });
   });

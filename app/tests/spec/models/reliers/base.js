@@ -53,6 +53,12 @@ define([
       });
     });
 
+    describe('isKeyFetchEnabled', function () {
+      it('returns `false`', function () {
+        assert.isFalse(relier.isKeyFetchEnabled());
+      });
+    });
+
     describe('isCustomizeSyncChecked', function () {
       it('returns `false`', function () {
         assert.isFalse(relier.isCustomizeSyncChecked());

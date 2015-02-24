@@ -97,6 +97,7 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
         });
 
         relier.set('service', 'chronical');
+        assert.isFalse(relier.isKeyFetchEnabled());
         // customizeSync should be ignored
         return client.signUp(email, password, relier, { customizeSync: true })
           .then(function (sessionData) {
@@ -107,9 +108,37 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
               resume: expectedResumeToken
             }));
 
-            // The following should only be set for Sync
+            // These should not be returned by default
             assert.isFalse('unwrapBKey' in sessionData);
             assert.isFalse('keyFetchToken' in sessionData);
+            // The following should only be set for Sync
+            assert.isFalse('customizeSync' in sessionData);
+          });
+      });
+
+      it('non-Sync signUp requests keys if the relier explicitly wants them', function () {
+        sinon.stub(realClient, 'signUp', function () {
+          return p({
+            unwrapBKey: 'unwrapBKey',
+            keyFetchToken: 'keyFetchToken'
+          });
+        });
+
+        relier.set('service', 'chronical');
+        relier.set('keys', true);
+        assert.isTrue(relier.isKeyFetchEnabled());
+        return client.signUp(email, password, relier, { customizeSync: true })
+          .then(function (sessionData) {
+            assert.isTrue(realClient.signUp.calledWith(trim(email), password, {
+              keys: true,
+              service: 'chronical',
+              redirectTo: REDIRECT_TO,
+              resume: expectedResumeToken
+            }));
+
+            assert.equal(sessionData.unwrapBKey, 'unwrapBKey');
+            assert.equal(sessionData.keyFetchToken, 'keyFetchToken');
+            // The following should only be set for Sync
             assert.isFalse('customizeSync' in sessionData);
           });
       });
@@ -287,9 +316,9 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
               keys: true
             }));
 
-            // The following should only be set for Sync
             assert.equal(sessionData.unwrapBKey, 'unwrapBKey');
             assert.equal(sessionData.keyFetchToken, 'keyFetchToken');
+            // The following should only be set for Sync
             assert.equal(sessionData.customizeSync, true);
           });
       });
@@ -300,6 +329,7 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
         });
 
         relier.set('service', 'chronical');
+        assert.isFalse(relier.isKeyFetchEnabled());
         // customizeSync should be ignored.
         return client.signIn(email, password, relier, { customizeSync: true })
           .then(function (sessionData) {
@@ -307,9 +337,34 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
               keys: false
             }));
 
-            // The following should only be set for Sync
+            // These should not be returned by default
             assert.isFalse('unwrapBKey' in sessionData);
             assert.isFalse('keyFetchToken' in sessionData);
+            // The following should only be set for Sync
+            assert.isFalse('customizeSync' in sessionData);
+          });
+      });
+
+      it('non-Sync signIn requests keys if the relier explicitly wants them', function () {
+        sinon.stub(realClient, 'signIn', function () {
+          return p({
+            unwrapBKey: 'unwrapBKey',
+            keyFetchToken: 'keyFetchToken'
+          });
+        });
+
+        relier.set('service', 'chronical');
+        relier.set('keys', true);
+        assert.isTrue(relier.isKeyFetchEnabled());
+        return client.signIn(email, password, relier, { customizeSync: true })
+          .then(function (sessionData) {
+            assert.isTrue(realClient.signIn.calledWith(trim(email), password, {
+              keys: true
+            }));
+
+            assert.equal(sessionData.unwrapBKey, 'unwrapBKey');
+            assert.equal(sessionData.keyFetchToken, 'keyFetchToken');
+            // The following should only be set for Sync
             assert.isFalse('customizeSync' in sessionData);
           });
       });

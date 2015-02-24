@@ -62,6 +62,13 @@ define([
     },
 
     /**
+     * Check if the relier needs access to a keyFetchToken.
+     */
+    isKeyFetchEnabled: function () {
+      return false;
+    },
+
+    /**
      * Create a resume token to be passed along in the email
      * verification links
      */
