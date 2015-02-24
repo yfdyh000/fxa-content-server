@@ -67,6 +67,24 @@ function (chai, sinon, WebChannelAuthenticationBroker, Relier, User, p, NullChan
       sinon.spy(view, 'displayError');
     }
 
+    function setupGeneratesOAuthCode() {
+      broker._assertionLibrary = {
+        generate: function mockGenerate() {
+          return p('mock_assertion');
+        }
+      };
+
+      broker._oAuthClient = {
+        getCode: function mockGetCode() {
+          var code = '00000000000000000000000000000000' +
+                     '00000000000000000000000000000000';
+          return p({
+            redirect: 'mock?state=STATE&code=' + code
+          });
+        }
+      };
+    }
+
 
     describe('fetch', function () {
       describe('for the signin/signup flow', function () {
@@ -171,6 +189,45 @@ function (chai, sinon, WebChannelAuthenticationBroker, Relier, User, p, NullChan
           .then(function () {
             assert.isTrue(broker.sendOAuthResultToRelier.called);
             assert.isFalse(view.displayError.called);
+          });
+      });
+    });
+
+    describe('getOAuthResult', function () {
+      it('does not derive keys by default', function () {
+        setupGeneratesOAuthCode();
+
+        return broker.getOAuthResult(account)
+          .then(function (result) {
+            assert.isFalse('keys' in result);
+          });
+      });
+
+      it('returns null keys when keyFetchToken is missing', function () {
+        setupGeneratesOAuthCode();
+        sinon.stub(broker.relier, 'isKeyFetchEnabled', function () {
+          return true;
+        });
+
+        return broker.getOAuthResult(account)
+          .then(function (result) {
+            assert.equal(result.keys, null);
+          });
+      });
+
+      it('derives keys when keyFetchToken is available', function () {
+        setupGeneratesOAuthCode();
+        sinon.stub(broker.relier, 'isKeyFetchEnabled', function () {
+          return true;
+        });
+        sinon.stub(broker, '_deriveRelierKeys', function () {
+          return 'KEYS';
+        });
+        account.set('keyFetchToken', 'keyFetchToken');
+
+        return broker.getOAuthResult(account)
+          .then(function (result) {
+            assert.equal(result.keys, 'KEYS');
           });
       });
     });

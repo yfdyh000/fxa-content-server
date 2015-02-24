@@ -54,6 +54,34 @@ define([
       return p();
     },
 
+    // WebChannel reliers can request access to relier-specific encryption
+    // keys.  In the future this logic may be lifted into the base OAuth class
+    // and made available to all reliers, but we're putting it in this subclass
+    // for now to guard against accidental exposure.
+
+    getOAuthResult: function (account) {
+      var self = this;
+      return OAuthAuthenticationBroker.prototype.getOAuthResult.call(this, account)
+        .then(function (result) {
+          if (! self.relier.isKeyFetchEnabled()) {
+            return result;
+          }
+          if (! account.get('keyFetchToken')) {
+            result.keys = null;
+            return result;
+          }
+          return self._deriveRelierKeys(account)
+            .then(function (keys) {
+              result.keys = keys;
+              return result;
+            });
+        });
+    },
+
+    _deriveRelierKeys: function (/* account */) {
+      return p.reject('not implemented yet');
+    },
+
     afterSignIn: function (account) {
       return OAuthAuthenticationBroker.prototype.afterSignIn.call(
                 this, account, { closeWindow: true });
