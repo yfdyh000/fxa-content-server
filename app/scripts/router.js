@@ -143,6 +143,8 @@ function (
       // back is only enabled after the first view is rendered.
       this.canGoBack = false;
 
+      this._firstViewHasLoaded = false;
+
       this.$stage = $('#stage');
 
       this.watchAnchors();
@@ -169,8 +171,6 @@ function (
     },
 
     showView: function (viewToShow) {
-      var isFirstView = ! this.currentView;
-
       if (this.currentView) {
         this.currentView.destroy();
       }
@@ -208,11 +208,12 @@ function (
 
           self.$logo.css('opacity', 1);
 
-          if (isFirstView) {
+          if (! self._firstViewHasLoaded) {
             // afterLoaded lets the RP know when the first screen has been
             // loaded. It does not expect a response, so no error handler
             // is attached and the promise is not returned.
             self.broker.afterLoaded();
+            self._firstViewHasLoaded = true;
           }
         })
         .fail(function (err) {
