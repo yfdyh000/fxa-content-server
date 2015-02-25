@@ -14,10 +14,11 @@ define([
   'stache!templates/settings/avatar_change',
   'lib/auth-errors',
   'lib/image-loader',
-  'models/cropper-image'
+  'models/cropper-image',
+  'models/profile-image'
 ],
-function ($, _, Cocktail, FormView, AvatarMixin, SettingsMixin, Template, AuthErrors,
-    ImageLoader, CropperImage) {
+function ($, _, Cocktail, FormView, AvatarMixin, SettingsMixin, Template,
+    AuthErrors, ImageLoader, CropperImage, ProfileImage) {
 
   var View = FormView.extend({
     template: Template,
@@ -34,15 +35,9 @@ function ($, _, Cocktail, FormView, AvatarMixin, SettingsMixin, Template, AuthEr
       this.FileReader = FileReader;
     },
 
-    context: function () {
-      return {
-        avatar: this.avatar
-      };
-    },
-
     afterVisible: function () {
       FormView.prototype.afterVisible.call(this);
-      return this._displayProfileImage(this.getSignedInAccount());
+      return this.displayProfileImage(this.getSignedInAccount());
     },
 
     afterRender: function () {
@@ -55,12 +50,9 @@ function ($, _, Cocktail, FormView, AvatarMixin, SettingsMixin, Template, AuthEr
     remove: function () {
       var self = this;
       var account = self.getSignedInAccount();
-      return account.getAvatar()
-        .then(function (avatar) {
-          return account.deleteAvatar(avatar.id);
-        })
+      return account.deleteAvatar(self.displayedProfileImage.get('id'))
         .then(function () {
-          self.updateAvatarUrl(null);
+          self.clearProfileImage();
           self.navigate('settings');
         }, function (err) {
           self.displayError(err);

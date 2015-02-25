@@ -68,7 +68,7 @@ function (Cocktail, Session, FormView, BaseView, AvatarMixin,
                                      '.avatar-wrapper';
 
       FormView.prototype.afterVisible.call(this);
-      return this._displayProfileImage(account, imageContainerSelector);
+      return this.displayProfileImage(account, imageContainerSelector);
     }
   });
 

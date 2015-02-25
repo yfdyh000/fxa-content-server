@@ -7,75 +7,51 @@
 'use strict';
 
 define([
-  'lib/image-loader',
-  'lib/profile-errors'
-], function (ImageLoader, ProfileErrors) {
+  'models/profile-image'
+], function (ProfileImage) {
 
   return {
-    // Attempt to load a profile image from the profile server
-    _fetchProfileImage: function (account) {
+    displayProfileImage: function (account, wrapperClass) {
       var self = this;
-
-      return account.getAvatar()
-        .then(function (result) {
-          if (result && result.avatar && result.id) {
-            return ImageLoader.load(result.avatar);
-          }
-        })
-        .then(null, function (err) {
-          if (! err.errno) {
-            err = ProfileErrors.toError('IMAGE_LOAD_ERROR');
-          }
-          // Failures to load a profile image are not displayed in the ui
-          // so log the error here to make sure it's in metrics.
-          self.logError(err);
-          throw err;
-        });
-    },
-
-    _displayProfileImage: function (account, wrapperClass) {
-      var self = this;
-      if (! account) {
-        return;
-      }
-
       if (! wrapperClass) {
         wrapperClass = '.avatar-wrapper';
       }
 
-      // If the account doesn't have a profile image URL cached it
-      // probably doesn't have one, so show the default image immediately
-      // while we check for a real image
-      if (! account.has('profileImageUrl')) {
+      // We'll optimize the UI for the case that the account
+      // doesn't have a profile image if it's not cached
+      if (self._shouldShowDefaultProfileImage(account)) {
         self.$(wrapperClass).addClass('with-default');
       }
 
-      return this._fetchProfileImage(account)
-        .then(function (img) {
-          if (img) {
-            self.$(wrapperClass).append(img);
-            self.$(wrapperClass).removeClass('with-default');
-            self.logEvent(self.className + '.profile_image_shown');
+      return account.fetchCurrentProfileImage(account)
+        .then(function (profileImage) {
+          self.displayedProfileImage = profileImage;
+
+          if (profileImage.isDefault()) {
+            self.$(wrapperClass).addClass('with-default');
+            self.logScreenEvent('profile_image_not_shown');
           } else {
-            self.logEvent(self.className + '.profile_image_not_shown');
+            self.$(wrapperClass).removeClass('with-default');
+            self.$(wrapperClass).append(profileImage.get('img'));
+            self.logScreenEvent('profile_image_shown');
           }
-        })
-        .then(null, function () {
-          // Ignore errors; the default image will be shown.
-          self.$(wrapperClass).addClass('with-default');
-          self.logEvent(self.className + '.profile_image_not_shown');
         });
     },
 
-    // Cache the profile image URL in localStorage whenever it changes
+    _shouldShowDefaultProfileImage: function (account) {
+      return ! account.has('profileImageUrl');
+    },
+
     // TODO: issue #2095 send broadcast
-    updateAvatarUrl: function (url) {
-      if (! url && url !== null) {
-        return;
-      }
+    updateProfileImage: function (profileImage) {
       var account = this.getSignedInAccount();
-      account.set('profileImageUrl', url);
+      account.setProfileImage(profileImage);
       this.user.setAccount(account);
+    },
+
+    clearProfileImage: function () {
+      // A blank image will clear the cache
+      this.updateProfileImage(new ProfileImage());
     }
   };
 });

@@ -72,7 +72,7 @@ function (Cocktail, p, BaseView, FormView, SignInTemplate, Session, PasswordMixi
 
     afterVisible: function () {
       FormView.prototype.afterVisible.call(this);
-      return this._displayProfileImage(this.getAccount());
+      return this.displayProfileImage(this.getAccount());
     },
 
     beforeDestroy: function () {
