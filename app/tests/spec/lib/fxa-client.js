@@ -724,6 +724,62 @@ function (chai, $, sinon, FxaClient, p, testHelpers, Session, FxaClientWrapper,
       });
     });
 
+    describe('accountKeys', function () {
+      it('fetches account keys on request', function () {
+        sinon.stub(realClient, 'accountKeys', function () {
+          return p({
+            kA: 'kA',
+            kB: 'kB'
+          });
+        });
+
+        return client.accountKeys('keyFetchToken', 'unwrapBKey')
+            .then(function (keys) {
+              assert.isTrue(realClient.accountKeys.calledWith('keyFetchToken', 'unwrapBKey'));
+              assert.equal(keys.kA, 'kA');
+              assert.equal(keys.kB, 'kB');
+            });
+      });
+    });
+
+    describe('generateDerivedKey', function () {
+      it('can derive keys by defering to underlying client lib', function () {
+        sinon.stub(realClient, 'generateDerivedKey', function () {
+          return p('derivedKey');
+        });
+
+        return client.generateDerivedKey('masterKey', 32, 'infoString')
+            .then(function (key) {
+              assert.isTrue(realClient.generateDerivedKey.calledWith('masterKey', 32, 'infoString'));
+              assert.equal(key, 'derivedKey');
+            });
+      });
+
+      it('enforces a non-empty `info` parameter', function () {
+        sinon.stub(realClient, 'generateDerivedKey', function () {
+          return p('derivedKey');
+        });
+
+        return client.generateDerivedKey('masterKey', 32, '')
+            .then(assert.fail, function (err) {
+              assert.equal(err.message, 'info must be provided');
+            });
+      });
+
+      it('accepts an optional `salt` string', function () {
+        sinon.stub(realClient, 'generateDerivedKey', function () {
+          return p('derivedKey');
+        });
+
+        return client.generateDerivedKey('masterKey', 32, 'info', 'salty')
+            .then(function (key) {
+              assert.isTrue(realClient.generateDerivedKey.calledWith('masterKey', 32, 'info', 'salty'));
+              assert.equal(key, 'derivedKey');
+            });
+      });
+    });
+
+
   });
 });
 

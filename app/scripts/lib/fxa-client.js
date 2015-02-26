@@ -357,6 +357,23 @@ function (_, FxaClient, $, xhr, p, Session, AuthErrors, Constants) {
         });
     },
 
+    accountKeys: function (keyFetchToken, unwrapBKey) {
+      return this._getClient()
+              .then(function (client) {
+                return client.accountKeys(keyFetchToken, unwrapBKey);
+              });
+    },
+
+    generateDerivedKey: function (key, size, info, salt) {
+      if (! info) {
+        return p.reject(new Error('info must be provided'));
+      }
+      return this._getClient()
+              .then(function (client) {
+                return client.generateDerivedKey(key, size, info, salt);
+              });
+    },
+
     // The resume token is eventually for post-verification if the
     // user verifies in a second client, with the goal of allowing
     // users to continueback to the original RP.

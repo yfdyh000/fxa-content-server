@@ -220,8 +220,8 @@ function (chai, sinon, WebChannelAuthenticationBroker, Relier, User, p, NullChan
         sinon.stub(broker.relier, 'isKeyFetchEnabled', function () {
           return true;
         });
-        sinon.stub(broker, '_deriveRelierKeys', function () {
-          return 'KEYS';
+        sinon.stub(broker, 'deriveRelierKeys', function () {
+          return p('KEYS');
         });
         account.set('keyFetchToken', 'keyFetchToken');
 
@@ -229,6 +229,12 @@ function (chai, sinon, WebChannelAuthenticationBroker, Relier, User, p, NullChan
           .then(function (result) {
             assert.equal(result.keys, 'KEYS');
           });
+      });
+    });
+
+    describe('deriveRelierKeys', function () {
+      it('correctly derives relier-specific keys', function () {
+        //throw "ERROR"
       });
     });
   });

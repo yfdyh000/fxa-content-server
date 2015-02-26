@@ -66,11 +66,7 @@ define([
           if (! self.relier.isKeyFetchEnabled()) {
             return result;
           }
-          if (! account.get('keyFetchToken')) {
-            result.keys = null;
-            return result;
-          }
-          return self._deriveRelierKeys(account)
+          return self.deriveRelierKeys(account)
             .then(function (keys) {
               result.keys = keys;
               return result;
@@ -78,8 +74,33 @@ define([
         });
     },
 
-    _deriveRelierKeys: function (/* account */) {
-      return p.reject('not implemented yet');
+    deriveRelierKeys: function (account) {
+      var self = this;
+      // XXX TODO: pass an fxaClient around properly
+      var fxaClient = this._assertionLibrary._fxaClient;
+      var masterKeys;
+      var relierKeys = {};
+      var infoPrefix = 'identity.mozilla.com/picl/v1/oauth/';
+      var keyFetchToken = account.get('keyFetchToken');
+      var unwrapBKey = account.get('unwrapBKey');
+      if (! keyFetchToken || ! unwrapBKey) {
+        return p(null);
+      }
+      return fxaClient.accountKeys(keyFetchToken, unwrapBKey)
+        .then(function (keys) {
+          masterKeys = keys;
+          var relierInfoA = infoPrefix + 'kAr:' + self.relier.get('clientId');
+          return fxaClient.generateDerivedKey(masterKeys.kA, 64, relierInfoA);
+        })
+        .then(function (kAr) {
+          relierKeys.kAr = kAr;
+          var relierInfoB = infoPrefix + 'kBr:' + self.relier.get('clientId');
+          return fxaClient.generateDerivedKey(masterKeys.kB, 64, relierInfoB);
+        })
+        .then(function (kBr) {
+          relierKeys.kBr = kBr;
+          return relierKeys;
+        });
     },
 
     afterSignIn: function (account) {
